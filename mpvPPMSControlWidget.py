@@ -363,7 +363,7 @@ class mpvPPMSControlWidget(TabWidget, QtWidgets.QWidget):
         if command == 0:
             self.instrument.set_temperature(value,rate)
             while not self.step_finished and not self.should_stop:
-                if self.instrument.temperature_status == "Stable":
+                if self.instrument.temp_status == "Stable" and np.abs(self.instrument.temp-value) < self.instrument.temp_tolerance:
                     # temperature sweep finished
                     self.step_finished = True
                     break
@@ -371,7 +371,7 @@ class mpvPPMSControlWidget(TabWidget, QtWidgets.QWidget):
         elif command == 1:
             self.instrument.set_field_driven(value,rate)
             while not self.step_finished and not self.should_stop:
-                if self.instrument.magnet_status == "Stable":
+                if self.instrument.field_status == "Stable" and np.abs(self.instrument.field-value) < self.instrument.field_tolerance:
                     # field sweep finished
                     self.step_finished = True
                     break
@@ -379,7 +379,7 @@ class mpvPPMSControlWidget(TabWidget, QtWidgets.QWidget):
         elif command == 2:
             self.instrument.set_field_persistent(value,rate)
             while not self.step_finished and not self.should_stop:
-                if self.instrument.magnet_status == "Stable":
+                if self.instrument.field_status == "Stable" and np.abs(self.instrument.field-value) < self.instrument.field_tolerance:
                     # field sweep finished
                     self.step_finished = True
                     break
