@@ -149,12 +149,16 @@ class mpvPPMS(Instrument):
     def temperature_status(self):
         """ Get temperature status and return a string descriptor. """
         t, t_status = self.client.get_temperature()
+        self.temp = t
+        self.temp_status = t_status
         return t_status
 
     @property
     def magnet_status(self):
         """ Get magnet status and return a string descriptor. """
         f, f_status = self.client.get_field()
+        self.field = f
+        self.field_status = f_status
         return f_status
     
     # def abort_sequence(self):
