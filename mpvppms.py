@@ -34,8 +34,10 @@ class mpvPPMS(Instrument):
         ### Initialize temperature and field variables
         self.temp = None
         self.temp_status = None
+        self.temp_tolerance = 0.1 # 0.1K tolerance for temperature stability
         self.field = None
         self.field_status = None
+        self.field_tolerance = 0.01 # 0.01T tolerance for field stability
 
     @property
     def temperature(self):
