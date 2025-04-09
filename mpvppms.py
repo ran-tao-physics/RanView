@@ -31,10 +31,18 @@ class mpvPPMS(Instrument):
         )
         self.client = client
 
+        ### Initialize temperature and field variables
+        self.temp = None
+        self.temp_status = None
+        self.field = None
+        self.field_status = None
+
     @property
     def temperature(self):
         """ Reads the temperature in Kelvin. """
         t, t_status = self.client.get_temperature()
+        self.temp = t
+        self.temp_status = t_status
         return t
     
     def set_temperature(self,temp,rate):
@@ -42,12 +50,13 @@ class mpvPPMS(Instrument):
         self.client.set_temperature(temp,
                            rate,
                            self.client.temperature.approach_mode.fast_settle)
-        self.client.wait_for(self.delay, 0, self.client.temperature.waitfor) # wait for 0s delay and 0s timeout
     
     @property
     def field(self):
         """ Reads the field in Tesla. """
         f, f_status = self.client.get_field()
+        self.field = f
+        self. field_status = f_status
         return f/10000
     
     def set_field_driven(self,field,rate):
