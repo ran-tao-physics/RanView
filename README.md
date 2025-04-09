@@ -20,3 +20,6 @@ with open(FILENAME) as fp:
             header = line.replace("\n","").split(",") # get rid of ending "\n" and split with comma in between
             break
 data=np.loadtxt(FILENAME,skiprows=4,delimiter=",")
+
+# 09/04/2025 update
+Added properties temp, temp_status, temp_tolerance, field, field_status, field_tolerance to the mpvPPMS class such that the sequencer in the GUI would not have to constantly send in commands to check status and cross-talk with the measurement routine.
