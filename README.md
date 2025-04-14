@@ -23,3 +23,6 @@ data=np.loadtxt(FILENAME,skiprows=4,delimiter=",")
 
 # 09/04/2025 update
 Added properties temp, temp_status, temp_tolerance, field, field_status, field_tolerance to the mpvPPMS class such that the sequencer in the GUI would not have to constantly send in commands to check status and cross-talk with the measurement routine.
+
+# 14/04/2025 update
+Added choice of whether to auto-range or not in lock-in measurements. Also added a class for Lakeshore 340.
