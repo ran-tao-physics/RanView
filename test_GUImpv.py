@@ -35,9 +35,10 @@ class SetupWindow(QtWidgets.QMainWindow):
     """
     supported_lockins = ['SR830','DSP72XX','DSP52XX']
     # variable for lockin ports
-    global lockin_ports, lockin_models, ppms_port, y_axes_labels, lockin_var, ppms_var, ppms_server, ppms_client, data_columns
+    global lockin_ports, lockin_models, lockin_autorange, ppms_port, y_axes_labels, lockin_var, ppms_var, ppms_server, ppms_client, data_columns
     lockin_ports = []
     lockin_models = []
+    lockin_autorange = []
     lockin_var = []
     y_axes_labels = []
     data_columns = []
@@ -71,6 +72,12 @@ class SetupWindow(QtWidgets.QMainWindow):
         self.instrumentportlabel = QtWidgets.QLabel()
         self.instrumentportlabel.setText('Instrument port:')
 
+        self.instrumentautorangelabel = QtWidgets.QLabel()
+        self.instrumentautorangelabel.setText('Autorange:')
+
+        self.instrumentautorangedropdown = QtWidgets.QComboBox()
+        self.instrumentautorangedropdown.addItems(['Yes','No'])
+
         self.ppmsportentry = QtWidgets.QLineEdit()
         self.ppmsportentry.setText("GPIB0::15::INSTR")
 
@@ -91,7 +98,7 @@ class SetupWindow(QtWidgets.QMainWindow):
 
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setColumnCount(2)
-        self.tree.setHeaderLabels(["Instrument model", "GPIB port"])
+        self.tree.setHeaderLabels(["Instrument model", "GPIB port", "Autorange"])
 
         treebox = QtWidgets.QHBoxLayout()
         treebox.setSpacing(10)
@@ -104,6 +111,8 @@ class SetupWindow(QtWidgets.QMainWindow):
         hbox.addWidget(self.instrumentmodeldropdown)
         hbox.addWidget(self.instrumentportlabel)
         hbox.addWidget(self.instrumentportentry)
+        hbox.addWidget(self.instrumentautorangelabel)
+        hbox.addWidget(self.instrumentautorangedropdown)
         hbox2.addWidget(self.add_instrument_button)
         hbox2.addWidget(self.delete_selected_instrument_button)
         hbox2.addWidget(self.set_com_settings_button)
@@ -115,6 +124,7 @@ class SetupWindow(QtWidgets.QMainWindow):
     def set_com_settings(self):
         lockin_ports = []
         lockin_models = []
+        lockin_autorange = []
         lockin_var = []
         y_axes_labels = []
         data_columns = []
@@ -123,6 +133,10 @@ class SetupWindow(QtWidgets.QMainWindow):
             # print(self.tree.topLevelItem(row).text(0))
             lockin_models.append(self.tree.topLevelItem(row).text(0))
             lockin_ports.append(self.tree.topLevelItem(row).text(1))
+            if self.tree.topLevelItem(row).text(1) == "Yes":
+                lockin_autorange.append(True)
+            else:
+                lockin_autorange.append(False)
         
         data_columns = ['Elapsed Time (s)', 'Elapsed Time (hr)']
         y_axes_labels = ['Elapsed Time (hr)']
@@ -178,6 +192,8 @@ class SetupWindow(QtWidgets.QMainWindow):
                     lockin_var[i] = DSP72XX_ar(lockin_ports[i])
             elif lockin_models[i] == 'DSP52XX':
                     lockin_var[i] = DSP52XX_ar(lockin_ports[i],timeout=12000) # use 12000ms timeouts because dsp52XX sometimes take a long time to reply, also add a bit of query delay to allow for time between write and read
+            if lockin_autorange[i]:
+                lockin_var[i].autorange_on = True
 
             if lockin_models[i] ==  'DSP52XX':
                 data_columns.append('Lock-In ' + str(i+1) + ' - X (V)')
@@ -216,21 +232,21 @@ class SetupWindow(QtWidgets.QMainWindow):
                             if lockin_models[i] ==  'DSP52XX':
                                 ### Check manually if auto-range is needed
                                 ### 52XX is slow in responding so one needs to delay between ask and write
-
-                                if abs(int(lockin_var[i].ask("MAG"))) > 9000 or abs(int(lockin_var[i].ask("MAG"))) < 2000:
-                                    ### need to change sensitivity, then change time constant to 0.1s to capture the quick change
-                                    current_tc = int(lockin_var[i].ask("TC"))
-                                    lockin_var[i].write("TC 4")
-                                    while abs(int(lockin_var[i].ask("MAG"))) > 9000 or abs(int(lockin_var[i].ask("MAG"))) < 1000:
-                                        current_sen = int(lockin_var[i].ask("SEN"))
-                                        if abs(int(lockin_var[i].ask("MAG"))) > 9000:
-                                            lockin_var[i].write("SEN %d" % (current_sen + 1))
-                                        elif abs(int(lockin_var[i].ask("MAG"))) < 1000:
-                                            lockin_var[i].write("SEN %d" % (current_sen - 1))
-                                        sleep(1) # give lock-in 1s to respond before checking again
-                                    ### change back to measurement TC after we're finished
-                                    lockin_var[i].write("TC %d" % current_tc)
-                                    sleep(10) ### give lock-in 10s to settle before measuring
+                                if lockin_autorange[i]:
+                                    if abs(int(lockin_var[i].ask("MAG"))) > 9000 or abs(int(lockin_var[i].ask("MAG"))) < 2000:
+                                        ### need to change sensitivity, then change time constant to 0.1s to capture the quick change
+                                        current_tc = int(lockin_var[i].ask("TC"))
+                                        lockin_var[i].write("TC 4")
+                                        while abs(int(lockin_var[i].ask("MAG"))) > 9000 or abs(int(lockin_var[i].ask("MAG"))) < 1000:
+                                            current_sen = int(lockin_var[i].ask("SEN"))
+                                            if abs(int(lockin_var[i].ask("MAG"))) > 9000:
+                                                lockin_var[i].write("SEN %d" % (current_sen + 1))
+                                            elif abs(int(lockin_var[i].ask("MAG"))) < 1000:
+                                                lockin_var[i].write("SEN %d" % (current_sen - 1))
+                                            sleep(1) # give lock-in 1s to respond before checking again
+                                        ### change back to measurement TC after we're finished
+                                        lockin_var[i].write("TC %d" % current_tc)
+                                        sleep(10) ### give lock-in 10s to settle before measuring
 
                                 #voltage_scaling = lockin_var[i].sensitivity/10000
                                 data['Lock-In ' + str(i+1) + ' - X (V)'] = lockin_var[i].x
@@ -238,7 +254,8 @@ class SetupWindow(QtWidgets.QMainWindow):
                                 data['Lock-In ' + str(i+1) + ' - Y (V)'] = lockin_var[i].y
                                 sleep(delay)
                             else:
-                                lockin_var[i].auto_range() # auto-range before acquiring data, auto_sensitivity doesn't work due to weird time-out problems
+                                if lockin_autorange[i]:
+                                    lockin_var[i].auto_range() # auto-range before acquiring data, auto_sensitivity doesn't work due to weird time-out problems
                                 data['Lock-In ' + str(i+1) + ' - X (V)'] = lockin_var[i].x
                                 data['Lock-In ' + str(i+1) + ' - Y (V)'] = lockin_var[i].y
                         self.emit('results', data)
@@ -288,7 +305,8 @@ class SetupWindow(QtWidgets.QMainWindow):
     def add_instrument(self):
         model = self.instrumentmodeldropdown.currentText()
         port = self.instrumentportentry.text()
-        item = QtWidgets.QTreeWidgetItem([model,port])
+        autorange = self.instrumentautorangedropdown.currentText()
+        item = QtWidgets.QTreeWidgetItem([model,port,autorange])
         self.tree.insertTopLevelItem(0, item)
 
     def delete_selected_instrument(self):

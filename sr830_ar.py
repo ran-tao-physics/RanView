@@ -68,6 +68,7 @@ class SR830_ar(Instrument):
     REFERENCE_SOURCE_TRIGGER = ['SINE', 'POS EDGE', 'NEG EDGE']
     INPUT_FILTER = ['Off', 'On']
     model = "SR830"
+    autorange_on = False
 
     status = Instrument.measurement(
         "*STB?",
@@ -609,7 +610,8 @@ class SR830_ar(Instrument):
             raise ValueError("No more that 6 values (in total) can be captured"
                              "simultaneously.")
         # first auto-range before recording data
-        self.auto_range()
+        if self.autorange_on:
+            self.auto_range()
 
         # check if additional parameters are given as a list
         if len(vals) == 1 and isinstance(vals[0], (list, tuple)):
