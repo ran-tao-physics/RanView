@@ -26,3 +26,6 @@ Added properties temp, temp_status, temp_tolerance, field, field_status, field_t
 
 # 14/04/2025 update
 Added choice of whether to auto-range or not in lock-in measurements. Also added a class for Lakeshore 340.
+
+# 04/05/2025 update
+Re-calibrated the load cell after workshop trimmed the mushroomed-out bit and updated load_cell_calibration in PlotSpectrumWidget.py 
