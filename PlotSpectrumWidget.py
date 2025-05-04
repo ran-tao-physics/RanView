@@ -245,7 +245,7 @@ class SpectrumPlotWidget(TabWidget, QtWidgets.QWidget):
         #f = -0.00525961239506678 + 0.243548554254327*V
 
         ### calibration with integrated setup, voltage in volts
-        f = 0.109774389100682 + 2.31626148365727*V
+        f = 0.0874248455273721 + 2.07143214029945*V
         return f
     
     def loadfilename(self):
