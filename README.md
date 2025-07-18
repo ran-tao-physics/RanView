@@ -29,3 +29,6 @@ Added choice of whether to auto-range or not in lock-in measurements. Also added
 
 # 04/05/2025 update
 Re-calibrated the load cell after workshop trimmed the mushroomed-out bit and updated load_cell_calibration in PlotSpectrumWidget.py 
+
+# 18/07/2025 update#
+Added more ruby fluorescence calibration and corrected previous ones.
