@@ -174,7 +174,7 @@ class SpectrumPlotWidget(TabWidget, QtWidgets.QWidget):
         self.temperatureentry.setText("300")
 
         self.rubycalibration = QtWidgets.QComboBox()
-        self.rubycalibration.addItems(['RT calibration from Patricia','Mao86 calibration with Ragan92 shift','Feng10 calibration with Ragan92 shift','Feng10 calibration with Buchsbaum84 shift','Feng10 calibration with no shift','Mao86 calibration with Buchsbaum84 shift','Shen20 calibration with Buchsbaum84 shift'])
+        self.rubycalibration.addItems(['RT calibration from Patricia','Feng10 calibration with Buchsbaum84 shift','Feng10 calibration with no shift','Mao86 calibration with Buchsbaum84 shift','Shen20 calibration with Buchsbaum84 shift'])
 
 
         self.plot_frame = SpectrumPlotFrame(
@@ -358,21 +358,12 @@ class SpectrumPlotWidget(TabWidget, QtWidgets.QWidget):
         return A*np.exp(-np.power(x-m,2)/2/s/s) + B
 
     ### Buchsbaum84 temperature calibration
-    def R1_peak_buchsbaum(T):
+    def R1_peak_buchsbaum(self,T):
         return 1e7/(14422.0-36.612*np.power(T/300,3/2)+169.77*np.power(T/300,4/2)-264.54*np.power(T/300,5/2)+112.14*np.power(T/300,6/2))
 
-    def RT_calibration(self, l):
+    def RT_calibration(self,l):
         # same as 300K calibration but use lambda0=694.3nm measured by Patricia on our rubies
         return 19040/7.665*(np.power((l/694.3),7.665)-1)
-
-    def calibration_with_4p5K_fit(self,l,T):
-        R1_peak = 1e7/(14423+4.49e-2*T-4.81e-4*T*T+3.71e-7*T*T*T) # Ragan92 temperature shift
-        return 17620*np.log((l-R1_peak+693.327785)/693.327785)
-
-    def calibration_with_300K_fit(self,l,T):
-        R1_peak = 1e7/(14423+4.49e-2*T-4.81e-4*T*T+3.71e-7*T*T*T) # Ragan92 temperature shift
-        R1_peak_300K = 1e7/(14423+4.49e-2*300-4.81e-4*300*300+3.71e-7*300*300*300)
-        return 19040/7.665*(np.power(((l-R1_peak+R1_peak_300K)/R1_peak_300K),7.665)-1)
 
     def calibration_with_4p5K_fit_and_ref(self,l,T):
         ### Feng10 fit at 4.5K with T shift from Buchsbaum84 (T shift was not measured below 15K)
@@ -383,7 +374,7 @@ class SpectrumPlotWidget(TabWidget, QtWidgets.QWidget):
         L0_4p5K = Lref + self.R1_peak_buchsbaum(4.5)-self.R1_peak_buchsbaum(Tref)
         return 17620*np.log((Pshift+L0_4p5K)/L0_4p5K)
         
-    def calibration_with_4p5K_fit_and_his_ref(l):
+    def calibration_with_4p5K_fit_and_his_ref(self,l):
         ### Feng10 fit at 4.5K with his own L0 and disregarding Tshift
         L0_4p5K = 693.3545071853821 # from digitizing and fitting a gaussian with 5 points on either side of peak
         return 17620*np.log(l/L0_4p5K)
@@ -417,20 +408,16 @@ class SpectrumPlotWidget(TabWidget, QtWidgets.QWidget):
         peakmax = float(self.maxwaveentry.text())
         T = float(self.temperatureentry.text())
         calibration = self.rubycalibration.currentText()
-        if calibration == "Feng10 calibration with Ragan92 shift":
-            cal = lambda x: self.calibration_with_4p5K_fit(x,T)
-        elif calibration == "Mao86 calibration with Ragan92 shift":
-            cal = lambda x: self.calibration_with_300K_fit(x,T)
-        elif calibration == "RT calibration from Patricia":
+        if calibration == "RT calibration from Patricia":
             cal = lambda x: self.RT_calibration(x)
         elif calibration == "Feng10 calibration with Buchsbaum84 shift":
-            cal = lambda x: self.calibration_with_4p5K_fit_and_ref(x)
+            cal = lambda x: self.calibration_with_4p5K_fit_and_ref(x,T)
         elif calibration == "Feng10 calibration with no shift":
             cal = lambda x: self.calibration_with_4p5K_fit_and_his_ref(x)
         elif calibration == "Mao86 calibration with Buchsbaum84 shift":
-            cal = lambda x: self.calibration_with_300K_fit_and_ref(x)
+            cal = lambda x: self.calibration_with_300K_fit_and_ref(x,T)
         elif calibration == "Shen20 calibration with Buchsbaum84 shift":
-            cal = lambda x: self.calibration_with_Shen20_fit_and_ref(x)
+            cal = lambda x: self.calibration_with_Shen20_fit_and_ref(x,T)
 
         if len(self.plot.listDataItems()) > 0:
             # use currently plotted data for fit
@@ -483,20 +470,16 @@ class SpectrumPlotWidget(TabWidget, QtWidgets.QWidget):
         # output pressure into text of pressurelabel
         T = float(self.temperatureentry.text())
         calibration = self.rubycalibration.currentText()
-        if calibration == "Feng10 calibration with Ragan92 shift":
-            cal = lambda x: self.calibration_with_4p5K_fit(x,T)
-        elif calibration == "Mao86 calibration with Ragan92 shift":
-            cal = lambda x: self.calibration_with_300K_fit(x,T)
-        elif calibration == "RT calibration from Patricia":
+        if calibration == "RT calibration from Patricia":
             cal = lambda x: self.RT_calibration(x)
         elif calibration == "Feng10 calibration with Buchsbaum84 shift":
-            cal = lambda x: self.calibration_with_4p5K_fit_and_ref(x)
+            cal = lambda x: self.calibration_with_4p5K_fit_and_ref(x,T)
         elif calibration == "Feng10 calibration with no shift":
             cal = lambda x: self.calibration_with_4p5K_fit_and_his_ref(x)
         elif calibration == "Mao86 calibration with Buchsbaum84 shift":
-            cal = lambda x: self.calibration_with_300K_fit_and_ref(x)
+            cal = lambda x: self.calibration_with_300K_fit_and_ref(x,T)
         elif calibration == "Shen20 calibration with Buchsbaum84 shift":
-            cal = lambda x: self.calibration_with_Shen20_fit_and_ref(x)
+            cal = lambda x: self.calibration_with_Shen20_fit_and_ref(x,T)
         lambda_e = float(self.peakwaveentry.text())
 
         p=cal(lambda_e)
@@ -627,5 +610,6 @@ class SpectrumPlotWidget(TabWidget, QtWidgets.QWidget):
                 txt_file.write(format(line[0], '.2f')+ " " + format(line[1], '.2f') + "\n")
             txt_file.write('end' + "\n") # to conform with spectrasuite format add line at the end
         
+
 
 
