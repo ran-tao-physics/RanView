@@ -32,3 +32,6 @@ Re-calibrated the load cell after workshop trimmed the mushroomed-out bit and up
 
 # 18/07/2025 update
 Added more ruby fluorescence calibration and corrected previous ones.
+
+# 10/10/2025 update
+Replaced old temperature calibration of ruby (Datchi07) with Buchsbaum84 calibration. Also added input for reference ruby temperature and wavelength input.
