@@ -174,7 +174,7 @@ class SpectrumPlotWidget(TabWidget, QtWidgets.QWidget):
         self.temperatureentry.setText("300")
 
         self.rubycalibration = QtWidgets.QComboBox()
-        self.rubycalibration.addItems(['RT calibration from Patricia','Mao86 calibration with Ragan92 shift','Feng10 calibration with Ragan92 shift','Feng10 calibration with Datchi07 shift','Feng10 calibration with no shift','Mao86 calibration with Datchi07 shift','Shen20 calibration with Datchi07 shift'])
+        self.rubycalibration.addItems(['RT calibration from Patricia','Mao86 calibration with Ragan92 shift','Feng10 calibration with Ragan92 shift','Feng10 calibration with Buchsbaum84 shift','Feng10 calibration with no shift','Mao86 calibration with Buchsbaum84 shift','Shen20 calibration with Buchsbaum84 shift'])
 
 
         self.plot_frame = SpectrumPlotFrame(
@@ -627,4 +627,5 @@ class SpectrumPlotWidget(TabWidget, QtWidgets.QWidget):
                 txt_file.write(format(line[0], '.2f')+ " " + format(line[1], '.2f') + "\n")
             txt_file.write('end' + "\n") # to conform with spectrasuite format add line at the end
         
+
 
