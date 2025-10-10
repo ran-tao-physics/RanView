@@ -14,7 +14,6 @@ from pymeasure.experiment import IntegerParameter, FloatParameter, Parameter
 from pymeasure.display.widgets import TableWidget, LogWidget
 from PlotSpectrumWidget import SpectrumPlotWidget
 from InstrumentControlWidget import InstrumentControltWidget
-from PlotDataWidget import PlotDataWidget
 from pymeasure.experiment import Procedure, Results, IntegerParameter, FloatParameter, Parameter, BooleanParameter
 from dsp72XX_ar import DSP72XX_ar
 from sr830_ar import SR830_ar
@@ -268,4 +267,5 @@ if __name__ == "__main__":
     window = SetupWindow()
     #window = MainWindow()
     window.show()
+
     sys.exit(app.exec()) # start application
